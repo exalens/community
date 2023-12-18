@@ -12,15 +12,50 @@ cd community
 ```
 ## Starting the Services
 ### On Linux
-To start the services on Linux, execute the following commands:
+To start the services on Linux, you have two options: using a provided script or direct Docker commands.
+
+#### Using the Provided Script
+Execute the following command:
 ```bash
 ./linux/retina-cortex.sh --start
 ```
+This script simplifies the process of starting the services by encapsulating the necessary Docker commands.
+
+#### Using Docker Commands (Without Cloning the Repository)
+Alternatively, you can start the Exalens service directly using Docker commands:
+  
+   1. Create a Docker network named `exalens`:
+   
+       ```bash
+       docker network create exalens
+       ```
+   
+   2. Run the `cortexCtrl` container within the `exalens` network:
+   
+       ```bash
+       docker run -d --name cortexCtrl --network exalens -v ~/.exalens:/opt -v /var/run/docker.sock:/var/run/docker.sock exalens/community_cortex_ctrl:latest
+      ```
 ### On Windows
+#### Using the Provided Script
 
 ```cmd
 .\windows\retina-cortex.bat --start
 ```
+#### Using Docker Commands (Without Cloning the Repository)
+Alternatively, you can start the Exalens service directly using Docker commands:
+  
+   1. Create a Docker network named `exalens`:
+   
+       ```cmd
+       docker network create exalens
+       ```
+   
+   2. Run the `cortexCtrl` container within the `exalens` network:
+   
+       ```cmd
+       docker run -d --name cortexCtrl --network exalens -v C:\Users\%USERNAME%\.exalens:/opt -v /var/run/docker.sock:/var/run/docker.sock exalens/community_cortex_ctrl:latest
+      ```
+
 ## Accessing the Service
 After starting the service, open your web browser and navigate to:
 ```html
