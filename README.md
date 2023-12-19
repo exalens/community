@@ -54,7 +54,6 @@ This feature is applicable only for Linux host machines. To monitor the network 
 #### Edit CortexProbe:
 - Locate the `CortexProbe` data collector, which should be running on the cortex machine.
 - Click to edit the CortexProbe. Here, you should find the status marked as `Connected`.
-  - If the status is not `Connected`, ensure that the data collector service is running properly.
 
 #### Specify the Interface to Monitor:
 - In the edit mode, you will have the option to specify or change the interface name that you want to monitor.
