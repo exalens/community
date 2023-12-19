@@ -5,6 +5,7 @@ Welcome to the Exalens Community Edition. This repository provides a Docker-base
 ## Mandatory Prerequisites
 Before starting, ensure you have the following installed on your host system:
 - Docker (see instructions here: https://docs.docker.com/engine/install/)
+- Use "install_docker.sh" under "/community/linux" to auto install Docker for Ubuntu Linux distributions
 
 ## Optional Prerequisites
 - Git (to clone this repository - however you can also manually download this repository as a ZIP file from Github and extract it in the desired directory on your host system)
