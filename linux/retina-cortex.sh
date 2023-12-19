@@ -57,26 +57,48 @@ start_services() {
 
 stop_services() {
     echo "Stopping services..."
-    docker stop cortexCtrl broker cacheDB threatIntelDB keycloakDB keycloak restApi webserver cortex cacheMongoDB threatIntelMongoDB
-    docker rm cortexCtrl broker cacheDB threatIntelDB keycloakDB keycloak restApi webserver cortex cacheMongoDB threatIntelMongoDB
+    docker stop cortexCtrl broker cacheDB threatIntelDB keycloakDB keycloak restApi webserver cortex cacheMongoDB threatIntelMongoDB probe probe_ctrl zeek
+    docker rm cortexCtrl broker cacheDB threatIntelDB keycloakDB keycloak restApi webserver cortex cacheMongoDB threatIntelMongoDB probe probe_ctrl zeek
     echo "Services stopped."
 }
 
 clean_install() {
     echo "Performing a clean install..."
+
+    # Stop all running services
+    echo "Stopping all running services..."
     stop_services
 
+    # Delete the .exalens folder
     echo "Deleting .exalens folder..."
     rm -rf ~/.exalens
 
+    # Pull all Docker images
+    echo "Pulling latest Docker images..."
     pull_images
+
+    # Restart the services
+    echo "Restarting services..."
     start_services
+
     echo "Clean install completed."
 }
 
 update_images() {
     echo "Updating all images..."
+
+    # Stop all running services
+    echo "Stopping all running services..."
+    stop_services
+
+    # Pull all Docker images
+    echo "Pulling latest Docker images..."
     pull_images
+
+    # Restart the services
+    echo "Restarting services..."
+    start_services
+
     echo "Update completed."
 }
 

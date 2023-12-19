@@ -41,7 +41,8 @@ goto end
 
 :stopServices
 echo Stopping services...
-docker stop cortexCtrl broker cacheDB threatIntelDB keycloakDB keycloak restApi webserver cortex cacheMongoDB threatIntelMongoDB
+docker stop cortexCtrl broker cacheDB threatIntelDB keycloakDB keycloak restApi webserver cortex cacheMongoDB threatIntelMongoDB probe probe_ctrl zeek
+docker rm cortexCtrl broker cacheDB threatIntelDB keycloakDB keycloak restApi webserver cortex cacheMongoDB threatIntelMongoDB probe probe_ctrl zeek
 echo Services stopped.
 goto end
 
@@ -57,9 +58,9 @@ goto startServices
 
 :updateImages
 echo Updating all images...
+call :stopServices
 call :pullImages
-echo Update completed.
-goto end
+goto startServices
 
 :pullImages
 docker pull exalens/community_broker:latest

@@ -75,3 +75,33 @@ To stop the services on Linux, use the same script with the --stop argument
 ```cmd
 ./windows/retina-cortex.bat --stop
 ```
+## Additional Script Options
+
+### `--clean-install`
+The `--clean-install` option performs a complete reinstallation of the Exalens services. This process includes:
+
+1. **Stopping all running services**: Ensures that all Exalens services are stopped before reinstalling.
+2. **Deleting the `.exalens` folder**: Removes the existing configuration and data stored in the `.exalens` folder. This step is crucial for a fresh installation.
+3. **Pulling all Docker images**: Downloads the latest versions of all necessary Docker images.
+4. **Restarting the services**: Initiates the services with the new installations.
+
+To perform a clean installation, execute the script with this option:
+```bash
+./linux/retina-cortex.sh --clean-install
+# or on Windows
+.\windows\retina-cortex.bat --clean-install
+```
+### `--update`
+The `--update` option updates all Docker images used by the Exalens platform to their latest versions and also restarts the services with these new images. This process ensures that your setup is running with the most current software versions.
+
+The update process includes:
+1. **Stopping all running services**: Ensures a clean state for updating the images.
+2. **Pulling the latest Docker images**: Downloads the latest versions of all Docker images used by Exalens.
+3. **Restarting the services**: Reinitiates the services with the updated images, ensuring that any new features or fixes are applied.
+
+To update the Docker images and restart the services, use the following command:
+```bash
+./linux/retina-cortex.sh --update
+# or on Windows
+.\windows\retina-cortex.bat --update
+```
