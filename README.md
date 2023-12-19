@@ -68,12 +68,12 @@ This feature is applicable only for Linux host machines. To monitor the network 
 
 To stop the services on Linux, use the same script with the --stop argument
 ```bash
-./linux/retina-cortex.sh --start
+./linux/retina-cortex.sh --stop
 ```
 ### On Windows
 To stop the services on Linux, use the same script with the --stop argument
 ```cmd
-./windows/retina-cortex.bat --stop
+.\windows\retina-cortex.bat --stop
 ```
 ## Additional Script Options
 
