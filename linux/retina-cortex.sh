@@ -1,5 +1,32 @@
 #!/bin/bash
 
+# Function to pull an image if not present
+pull_if_not_exists() {
+    if ! docker image inspect $1 > /dev/null 2>&1; then
+        echo "Image $1 not found. Pulling..."
+        docker pull $1
+    else
+        echo "Image $1 already exists."
+    fi
+}
+
+pull_images() {
+    echo "Pulling all images..."
+
+    # Pull all the containers
+    docker pull exalens/community_broker:latest
+    docker pull exalens/community_cache_db:latest
+    docker pull exalens/community_threat_intel_db:latest
+    docker pull exalens/community_keycloak_db:latest
+    docker pull exalens/community_keycloak:latest
+    docker pull exalens/community_restapi:latest
+    docker pull exalens/community_webserver:latest
+    docker pull exalens/community_cortex:latest
+    docker pull exalens/community_cache_mongo_db:latest
+    docker pull exalens/community_threat_intel_mongo_db:latest
+    docker pull exalens/community_cortex_ctrl:latest
+}
+
 start_services() {
     echo "Starting services..."
 
@@ -11,7 +38,19 @@ start_services() {
         echo "'exalens' network already exists."
     fi
 
-    # Start the containers
+    # Pull necessary images if not exists
+    pull_if_not_exists exalens/community_broker:latest
+    pull_if_not_exists exalens/community_cache_db:latest
+    pull_if_not_exists exalens/community_threat_intel_db:latest
+    pull_if_not_exists exalens/community_keycloak_db:latest
+    pull_if_not_exists exalens/community_keycloak:latest
+    pull_if_not_exists exalens/community_restapi:latest
+    pull_if_not_exists exalens/community_webserver:latest
+    pull_if_not_exists exalens/community_cortex:latest
+    pull_if_not_exists exalens/community_cache_mongo_db:latest
+    pull_if_not_exists exalens/community_threat_intel_mongo_db:latest
+    pull_if_not_exists exalens/community_cortex_ctrl:latest
+
     docker run -d --name cortexCtrl --network exalens -v ~/.exalens:/opt -v /var/run/docker.sock:/var/run/docker.sock exalens/community_cortex_ctrl:latest
     echo "Services started."
 }
@@ -19,7 +58,26 @@ start_services() {
 stop_services() {
     echo "Stopping services..."
     docker stop cortexCtrl broker cacheDB threatIntelDB keycloakDB keycloak restApi webserver cortex cacheMongoDB threatIntelMongoDB
+    docker rm cortexCtrl broker cacheDB threatIntelDB keycloakDB keycloak restApi webserver cortex cacheMongoDB threatIntelMongoDB
     echo "Services stopped."
+}
+
+clean_install() {
+    echo "Performing a clean install..."
+    stop_services
+
+    echo "Deleting .exalens folder..."
+    rm -rf ~/.exalens
+
+    pull_images
+    start_services
+    echo "Clean install completed."
+}
+
+update_images() {
+    echo "Updating all images..."
+    pull_images
+    echo "Update completed."
 }
 
 case "$1" in
@@ -29,7 +87,13 @@ case "$1" in
     --stop)
         stop_services
         ;;
+    --clean-install)
+        clean_install
+        ;;
+    --update)
+        update_images
+        ;;
     *)
-        echo "Usage: $0 --start | --stop"
+        echo "Usage: $0 --start | --stop | --clean-install | --update"
         exit 1
 esac
