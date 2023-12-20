@@ -35,7 +35,6 @@ call :pullIfNotExists exalens/community_cache_mongo_db:latest
 call :pullIfNotExists exalens/community_threat_intel_mongo_db:latest
 call :pullIfNotExists exalens/community_cortex_ctrl:latest
 call :pullIfNotExists exalens/community_probe:latest
-call :pullIfNotExists exalens/community_probe_ctrl:latest
 call :pullIfNotExists exalens/community_zeek:latest
 
 docker run -d --name cortexCtrl --network %EXALENS_NETWORK% --restart always -v %VOLUME_PATH%:/opt -v //var/run/docker.sock:/var/run/docker.sock exalens/community_cortex_ctrl:latest
@@ -78,7 +77,6 @@ docker pull exalens/community_cache_mongo_db:latest
 docker pull exalens/community_threat_intel_mongo_db:latest
 docker pull exalens/community_cortex_ctrl:latest
 docker pull exalens/community_probe:latest
-docker pull exalens/community_probe_ctrl:latest
 docker pull exalens/community_zeek:latest
 goto :EOF
 
