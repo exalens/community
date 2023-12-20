@@ -25,6 +25,9 @@ pull_images() {
     docker pull exalens/community_cache_mongo_db:latest
     docker pull exalens/community_threat_intel_mongo_db:latest
     docker pull exalens/community_cortex_ctrl:latest
+    docker pull exalens/community_probe:latest
+    docker pull exalens/community_probe_ctrl:latest
+    docker pull exalens/community_zeek:latest
 }
 
 start_services() {
@@ -50,8 +53,11 @@ start_services() {
     pull_if_not_exists exalens/community_cache_mongo_db:latest
     pull_if_not_exists exalens/community_threat_intel_mongo_db:latest
     pull_if_not_exists exalens/community_cortex_ctrl:latest
+    pull_if_not_exists exalens/community_probe:latest
+    pull_if_not_exists exalens/community_probe_ctrl:latest
+    pull_if_not_exists exalens/community_zeek:latest
 
-    docker run -d --name cortexCtrl --network exalens -v ~/.exalens:/opt -v /var/run/docker.sock:/var/run/docker.sock exalens/community_cortex_ctrl:latest
+    docker run -d --name cortexCtrl --network exalens --restart always -v ~/.exalens:/opt -v /var/run/docker.sock:/var/run/docker.sock exalens/community_cortex_ctrl:latest
     echo "Services started."
 }
 
