@@ -3,6 +3,7 @@ setlocal
 
 set EXALENS_NETWORK=exalens
 set VOLUME_PATH=C:\Users\%USERNAME%\.exalens
+set file_path=%USERPROFILE%\.exalens\retinaCortex\log\boot.log
 
 :checkArgs
 if "%~1"=="" goto usage
@@ -14,6 +15,9 @@ goto usage
 
 :startServices
 echo Starting services...
+
+REM Delete the boot.log file if it exists
+if exist "%file_path%" del /f /q "%file_path%"
 
 docker network ls | findstr /C:%EXALENS_NETWORK% >nul
 if errorlevel 1 (
@@ -39,7 +43,41 @@ call :pullIfNotExists exalens/community_zeek:latest
 
 docker run -d --name cortexCtrl --network %EXALENS_NETWORK% --restart always -v %VOLUME_PATH%:/opt -v //var/run/docker.sock:/var/run/docker.sock exalens/community_cortex_ctrl:latest
 echo Services started.
+call :monitorStartup
 goto end
+
+:monitorStartup
+set "prev_percent=0"
+
+:wait_for_file
+if not exist "%file_path%" (
+    echo Initializing...
+    timeout /t 1 /nobreak >nul
+    goto wait_for_file
+)
+
+:loop
+for /f "usebackq delims=" %%a in ("%file_path%") do (
+    call :extract_percentage "%%a"
+)
+if not "%percent%"=="" (
+    echo Current progress: %percent%%%
+)
+if not "%percent%"=="100" (
+    timeout /t 1 /nobreak >nul
+    goto :loop
+)
+goto :EOF
+
+:extract_percentage
+set "line=%~1"
+set "percent="
+for %%a in (%line::= %) do (
+    set "percent=%%a"
+)
+
+goto :EOF
+
 
 :stopServices
 echo Stopping services...

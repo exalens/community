@@ -31,7 +31,7 @@ pull_images() {
 
 start_services() {
     echo "Starting services..."
-
+    clear_progress_file
     # Check if the 'exalens' network exists
     if ! docker network ls | grep -q "exalens"; then
         echo "'exalens' network does not exist. Creating network..."
@@ -56,6 +56,10 @@ start_services() {
     pull_if_not_exists exalens/community_zeek:latest
 
     docker run -d --name cortexCtrl --network exalens --restart always -v ~/.exalens:/opt -v /var/run/docker.sock:/var/run/docker.sock exalens/community_cortex_ctrl:latest
+<<<<<<< Updated upstream
+=======
+    progress
+>>>>>>> Stashed changes
     echo "Services started."
 }
 
@@ -75,7 +79,7 @@ clean_install() {
 
     # Delete the .exalens folder
     echo "Deleting .exalens folder..."
-    rm -rf ~/.exalens
+    sudo rm -rf ~/.exalens
 
     # Pull all Docker images
     echo "Pulling latest Docker images..."
@@ -105,6 +109,47 @@ update_images() {
 
     echo "Update completed."
 }
+
+
+file_path="$HOME/.exalens/retinaCortex/log/boot.log"
+clear_progress_file(){
+  # Delete the file if it exists
+  if [ -f "$file_path" ]; then
+      rm -f "$file_path"
+  fi
+
+}
+
+progress(){
+
+  extract_percentage() {
+      echo "$1" | grep -oP '(?<=:)\d+(?=%)'
+  }
+
+  prev_percent="0"
+
+  while [ ! -f "$file_path" ]; do
+      echo -ne "\r${spinner:$i:1} Current progress: $prev_percent% \r"
+      sleep 0.1
+  done
+
+
+
+  tail -f "$file_path" | while read line; do
+      percent=$(extract_percentage "$line")
+      if [ ! -z "$percent" ] && [ "$percent" != "$prev_percent" ]; then
+          echo -ne "Current progress: $percent% \r"
+          prev_percent=$percent
+      fi
+
+      if [[ "$percent" =~ ^[0-9]+$ ]] && [ "$percent" -eq 100 ]; then
+          echo -ne "\nStartup completed.\n"
+          break
+      fi
+  done
+
+}
+
 
 case "$1" in
     --start)
