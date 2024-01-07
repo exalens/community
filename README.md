@@ -2,13 +2,10 @@
 
 Welcome to the Exalens Community Edition. This repository provides a Docker-based setup for the Exalens platform, allowing you to easily start and stop Exalens services on both Windows and Linux systems.
 
-## Mandatory Prerequisites
-Before starting, ensure you have the following installed on your host system:
-- Docker (see instructions here: https://docs.docker.com/engine/install/)
-- Use "install_docker.sh" under "/community/linux" to auto install Docker for Ubuntu Linux distributions
-
-## Optional Prerequisites
-- Git (to clone this repository - however you can also manually download this repository as a ZIP file from Github and extract it in the desired directory on your host system)
+## Prerequisites
+Before starting, ensure you have the following installed:
+- Docker
+- Git (to clone this repository)
 
 ## Cloning the Repository
 Clone this repository to your local machine using the following command:
@@ -35,9 +32,9 @@ To start the services on Windows, use the provided script by executing the follo
 ## Accessing the Service
 After starting the service, open your web browser and navigate to:
 ```html
-https://[IP_ADDRESS/HOSTNAME]:443
+https://[IP_ADDRESS]:443
 ```
-Replace [IP_ADDRESS] with the IP address of the machine, or [HOSTNAME] with the DNS hostname of the machine, where the Exalens service is running.
+Replace [IP_ADDRESS] with the IP address of the machine where the Exalens service is running.
 
 Upon your first visit, your browser may warn you about the security risk due to the use of a self-signed certificate. This is a common alert when using self-signed certificates. Please proceed by accepting the risk or adding an exception in your browser to continue. This process varies depending on the browser you are using.
 

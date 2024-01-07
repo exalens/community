@@ -56,10 +56,7 @@ start_services() {
     pull_if_not_exists exalens/community_zeek:latest
 
     docker run -d --name cortexCtrl --network exalens --restart always -v ~/.exalens:/opt -v /var/run/docker.sock:/var/run/docker.sock exalens/community_cortex_ctrl:latest
-<<<<<<< Updated upstream
-=======
     progress
->>>>>>> Stashed changes
     echo "Services started."
 }
 
