@@ -5,8 +5,6 @@ pull_if_not_exists() {
     if ! docker image inspect $1 > /dev/null 2>&1; then
         echo "Image $1 not found. Pulling..."
         docker pull $1
-    else
-        echo "Image $1 already exists."
     fi
 }
 
@@ -32,12 +30,34 @@ pull_images() {
 start_services() {
     echo "Starting services..."
     clear_progress_file
+
+    # Function to stop and remove a container if it is running
+    stop_and_remove_if_running() {
+        if docker ps --format '{{.Names}}' | grep -q $1; then
+            docker stop $1
+            docker rm $1
+        fi
+    }
+
+    # Check and stop/remove containers if they are already running
+    stop_and_remove_if_running cortexCtrl
+    stop_and_remove_if_running broker
+    stop_and_remove_if_running cacheDB
+    stop_and_remove_if_running threatIntelDB
+    stop_and_remove_if_running keycloakDB
+    stop_and_remove_if_running keycloak
+    stop_and_remove_if_running restApi
+    stop_and_remove_if_running webserver
+    stop_and_remove_if_running cortex
+    stop_and_remove_if_running cacheMongoDB
+    stop_and_remove_if_running threatIntelMongoDB
+    stop_and_remove_if_running probe
+    stop_and_remove_if_running probe_ctrl
+    stop_and_remove_if_running zeek
+
     # Check if the 'exalens' network exists
     if ! docker network ls | grep -q "exalens"; then
-        echo "'exalens' network does not exist. Creating network..."
         docker network create exalens
-    else
-        echo "'exalens' network already exists."
     fi
 
     # Pull necessary images if not exists
@@ -55,17 +75,45 @@ start_services() {
     pull_if_not_exists exalens/community_probe:latest
     pull_if_not_exists exalens/community_zeek:latest
 
+    # Start the containers
     docker run -d --name cortexCtrl --network exalens --restart always -v ~/.exalens:/opt -v /var/run/docker.sock:/var/run/docker.sock exalens/community_cortex_ctrl:latest
+
+
     progress
     echo "Services started."
 }
 
+
 stop_services() {
-    echo "Stopping services..."
-    docker stop cortexCtrl broker cacheDB threatIntelDB keycloakDB keycloak restApi webserver cortex cacheMongoDB threatIntelMongoDB probe probe_ctrl zeek
-    docker rm cortexCtrl broker cacheDB threatIntelDB keycloakDB keycloak restApi webserver cortex cacheMongoDB threatIntelMongoDB probe probe_ctrl zeek
-    echo "Services stopped."
+    echo "Stopping and removing services..."
+
+    # Function to stop and remove a container only if it is running
+    stop_and_remove_if_running() {
+        if docker ps --format '{{.Names}}' | grep -q $1; then
+            docker stop $1
+            docker rm $1
+        fi
+    }
+
+    # Stop and remove each container only if it is running
+    stop_and_remove_if_running cortexCtrl
+    stop_and_remove_if_running broker
+    stop_and_remove_if_running cacheDB
+    stop_and_remove_if_running threatIntelDB
+    stop_and_remove_if_running keycloakDB
+    stop_and_remove_if_running keycloak
+    stop_and_remove_if_running restApi
+    stop_and_remove_if_running webserver
+    stop_and_remove_if_running cortex
+    stop_and_remove_if_running cacheMongoDB
+    stop_and_remove_if_running threatIntelMongoDB
+    stop_and_remove_if_running probe
+    stop_and_remove_if_running probe_ctrl
+    stop_and_remove_if_running zeek
+
+    echo "stop completed."
 }
+
 
 clean_install() {
     echo "Performing a clean install..."
