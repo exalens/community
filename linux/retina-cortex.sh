@@ -34,8 +34,10 @@ start_services() {
     # Function to stop and remove a container if it is running
     stop_and_remove_if_running() {
         if docker ps --format '{{.Names}}' | grep -q $1; then
-            docker stop $1
-            docker rm $1
+            echo  -n "."
+            docker stop $1 > /dev/null
+            echo  -n "."
+            docker rm $1 > /dev/null
         fi
     }
 
@@ -76,7 +78,7 @@ start_services() {
     pull_if_not_exists exalens/community_zeek:latest
 
     # Start the containers
-    docker run -d --name cortexCtrl --network exalens --restart always -v ~/.exalens:/opt -v /var/run/docker.sock:/var/run/docker.sock exalens/community_cortex_ctrl:latest
+    docker run -d --name cortexCtrl --network exalens --restart always -v ~/.exalens:/opt -v /var/run/docker.sock:/var/run/docker.sock exalens/community_cortex_ctrl:latest > /dev/null
 
 
     progress
@@ -90,8 +92,10 @@ stop_services() {
     # Function to stop and remove a container only if it is running
     stop_and_remove_if_running() {
         if docker ps --format '{{.Names}}' | grep -q $1; then
-            docker stop $1
-            docker rm $1
+            echo  -n "."
+            docker stop $1 > /dev/null
+            echo  -n "."
+            docker rm $1 > /dev/null
         fi
     }
 
