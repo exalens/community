@@ -5,6 +5,12 @@ set EXALENS_NETWORK=exalens
 set VOLUME_PATH=C:\Users\%USERNAME%\.exalens
 set file_path=%USERPROFILE%\.exalens\retinaCortex\log\boot.log
 
+docker info >nul 2>&1
+if errorlevel 1 (
+    echo Docker engine is not running. Please start Docker and try again.
+    goto end
+)
+
 :checkArgs
 if "%~1"=="" goto usage
 if /I "%~1"=="--start" goto startServices
