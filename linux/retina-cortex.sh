@@ -1,5 +1,7 @@
 #!/bin/bash
 
+TAG="latest"
+
 # Function to pull an image if not present
 pull_if_not_exists() {
     if ! docker image inspect $1 > /dev/null 2>&1; then
@@ -8,27 +10,39 @@ pull_if_not_exists() {
     fi
 }
 
+set_tag() {
+  TAG=$1
+  if [ -z "$TAG" ]; then
+#    echo "Please provide the tag for images."
+#    read TAG
+    TAG="latest"
+  fi
+
+}
+
+
 pull_images() {
-    echo "Pulling all images..."
+
+    echo "Pulling all images with tag :$TAG..."
 
     # Pull all the containers
-    docker pull exalens/community_broker:latest
-    docker pull exalens/community_cache_db:latest
-    docker pull exalens/community_threat_intel_db:latest
-    docker pull exalens/community_keycloak_db:latest
-    docker pull exalens/community_keycloak:latest
-    docker pull exalens/community_restapi:latest
-    docker pull exalens/community_webserver:latest
-    docker pull exalens/community_cortex:latest
-    docker pull exalens/community_cache_mongo_db:latest
-    docker pull exalens/community_threat_intel_mongo_db:latest
-    docker pull exalens/community_cortex_ctrl:latest
-    docker pull exalens/community_probe:latest
-    docker pull exalens/community_zeek:latest
+    docker pull exalens/community_broker:$TAG
+    docker pull exalens/community_cache_db:$TAG
+    docker pull exalens/community_threat_intel_db:$TAG
+    docker pull exalens/community_keycloak_db:$TAG
+    docker pull exalens/community_keycloak:$TAG
+    docker pull exalens/community_restapi:$TAG
+    docker pull exalens/community_webserver:$TAG
+    docker pull exalens/community_cortex:$TAG
+    docker pull exalens/community_cache_mongo_db:$TAG
+    docker pull exalens/community_threat_intel_mongo_db:$TAG
+    docker pull exalens/community_cortex_ctrl:$TAG
+    docker pull exalens/community_probe:$TAG
+    docker pull exalens/community_zeek:$TAG
 }
 
 start_services() {
-    echo "Starting services..."
+    echo "Starting services...(TAG :$TAG)"
     clear_progress_file
 
     # Function to stop and remove a container if it is running
@@ -63,22 +77,22 @@ start_services() {
     fi
 
     # Pull necessary images if not exists
-    pull_if_not_exists exalens/community_broker:latest
-    pull_if_not_exists exalens/community_cache_db:latest
-    pull_if_not_exists exalens/community_threat_intel_db:latest
-    pull_if_not_exists exalens/community_keycloak_db:latest
-    pull_if_not_exists exalens/community_keycloak:latest
-    pull_if_not_exists exalens/community_restapi:latest
-    pull_if_not_exists exalens/community_webserver:latest
-    pull_if_not_exists exalens/community_cortex:latest
-    pull_if_not_exists exalens/community_cache_mongo_db:latest
-    pull_if_not_exists exalens/community_threat_intel_mongo_db:latest
-    pull_if_not_exists exalens/community_cortex_ctrl:latest
-    pull_if_not_exists exalens/community_probe:latest
-    pull_if_not_exists exalens/community_zeek:latest
+    pull_if_not_exists exalens/community_broker:$TAG
+    pull_if_not_exists exalens/community_cache_db:$TAG
+    pull_if_not_exists exalens/community_threat_intel_db:$TAG
+    pull_if_not_exists exalens/community_keycloak_db:$TAG
+    pull_if_not_exists exalens/community_keycloak:$TAG
+    pull_if_not_exists exalens/community_restapi:$TAG
+    pull_if_not_exists exalens/community_webserver:$TAG
+    pull_if_not_exists exalens/community_cortex:$TAG
+    pull_if_not_exists exalens/community_cache_mongo_db:$TAG
+    pull_if_not_exists exalens/community_threat_intel_mongo_db:$TAG
+    pull_if_not_exists exalens/community_cortex_ctrl:$TAG
+    pull_if_not_exists exalens/community_probe:$TAG
+    pull_if_not_exists exalens/community_zeek:$TAG
 
     # Start the containers
-    docker run -d --name cortexCtrl --network exalens --restart always -v ~/.exalens:/opt -v /var/run/docker.sock:/var/run/docker.sock exalens/community_cortex_ctrl:latest > /dev/null
+    docker run -d --name cortexCtrl --network exalens --restart always -v ~/.exalens:/opt -v /var/run/docker.sock:/var/run/docker.sock exalens/community_cortex_ctrl:$TAG > /dev/null
 
 
     progress
@@ -131,7 +145,7 @@ clean_install() {
     sudo rm -rf ~/.exalens
 
     # Pull all Docker images
-    echo "Pulling latest Docker images..."
+    echo "Pulling Docker images with tag $TAG..."
     pull_images
 
     # Restart the services
@@ -142,14 +156,14 @@ clean_install() {
 }
 
 update_images() {
-    echo "Updating all images..."
+    echo "Updating all images with tag $TAG..."
 
     # Stop all running services
     echo "Stopping all running services..."
     stop_services
 
     # Pull all Docker images
-    echo "Pulling latest Docker images..."
+    echo "Pulling Docker images with tag $TAG..."
     pull_images
 
     # Restart the services
@@ -199,21 +213,37 @@ progress(){
 
 }
 
+stop_and_remove_if_running() {
+    if docker ps --format '{{.Names}}' | grep -q $1; then
+        docker stop $1 > /dev/null
+        docker rm $1 > /dev/null
+    fi
+}
+
+update_probe_hostname(){
+  docker exec probe_ctrl python3.10 updateHostname.py $1
+}
 
 case "$1" in
     --start)
+        set_tag $2
         start_services
         ;;
     --stop)
         stop_services
         ;;
     --clean-install)
+        set_tag $2
         clean_install
         ;;
     --update)
+        set_tag $2
         update_images
         ;;
+    --update-hostname)
+        update_probe_hostname "$2"
+        ;;
     *)
-        echo "Usage: $0 --start | --stop | --clean-install | --update"
+        echo "Usage: $0 --start {tag}| --stop | --clean-install {tag} | --update {tag} | --update-hostname {hostname}"
         exit 1
 esac
