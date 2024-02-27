@@ -4,12 +4,7 @@ setlocal
 set EXALENS_NETWORK=exalens
 set VOLUME_PATH=C:\Users\%USERNAME%\.exalens
 set file_path=%USERPROFILE%\.exalens\retinaCortex\log\boot.log
-
-docker info >nul 2>&1
-if errorlevel 1 (
-    echo Docker engine is not running. Please start Docker and try again.
-    goto end
-)
+set TAG=latest
 
 :checkArgs
 if "%~1"=="" goto usage
@@ -17,9 +12,21 @@ if /I "%~1"=="--start" goto startServices
 if /I "%~1"=="--stop" goto stopServices
 if /I "%~1"=="--clean-install" goto cleanInstall
 if /I "%~1"=="--update" goto updateImages
+if /I "%~1"=="--update-hostname" goto updateProbeHostname
 goto usage
 
+:setTag
+set TAG="%~2"
+if "%TAG%" == "" (
+  set TAG=latest
+  echo Using default tag: "latest"
+) else (
+  echo Using provided tag: "%TAG%"
+)
+goto :EOF
+
 :startServices
+call :setTag
 echo Starting services...
 
 REM Delete the boot.log file if it exists
@@ -33,21 +40,21 @@ if errorlevel 1 (
     echo 'exalens' network already exists.
 )
 
-call :pullIfNotExists exalens/community_broker:latest
-call :pullIfNotExists exalens/community_cache_db:latest
-call :pullIfNotExists exalens/community_threat_intel_db:latest
-call :pullIfNotExists exalens/community_keycloak_db:latest
-call :pullIfNotExists exalens/community_keycloak:latest
-call :pullIfNotExists exalens/community_restapi:latest
-call :pullIfNotExists exalens/community_webserver:latest
-call :pullIfNotExists exalens/community_cortex:latest
-call :pullIfNotExists exalens/community_cache_mongo_db:latest
-call :pullIfNotExists exalens/community_threat_intel_mongo_db:latest
-call :pullIfNotExists exalens/community_cortex_ctrl:latest
-call :pullIfNotExists exalens/community_probe:latest
-call :pullIfNotExists exalens/community_zeek:latest
+call :pullIfNotExists exalens/community_broker:%TAG%
+call :pullIfNotExists exalens/community_cache_db:%TAG%
+call :pullIfNotExists exalens/community_threat_intel_db:%TAG%
+call :pullIfNotExists exalens/community_keycloak_db:%TAG%
+call :pullIfNotExists exalens/community_keycloak:%TAG%
+call :pullIfNotExists exalens/community_restapi:%TAG%
+call :pullIfNotExists exalens/community_webserver:%TAG%
+call :pullIfNotExists exalens/community_cortex:%TAG%
+call :pullIfNotExists exalens/community_cache_mongo_db:%TAG%
+call :pullIfNotExists exalens/community_threat_intel_mongo_db:%TAG%
+call :pullIfNotExists exalens/community_cortex_ctrl:%TAG%
+call :pullIfNotExists exalens/community_probe:%TAG%
+call :pullIfNotExists exalens/community_zeek:%TAG%
 
-docker run -d --name cortexCtrl --network %EXALENS_NETWORK% --restart always -v %VOLUME_PATH%:/opt -v //var/run/docker.sock:/var/run/docker.sock exalens/community_cortex_ctrl:latest
+docker run -d --name cortexCtrl --network %EXALENS_NETWORK% --restart always -v %VOLUME_PATH%:/opt -v //var/run/docker.sock:/var/run/docker.sock exalens/community_cortex_ctrl:%TAG%
 echo Services started.
 call :monitorStartup
 goto end
@@ -93,6 +100,7 @@ echo Services stopped.
 goto end
 
 :cleanInstall
+call :setTag
 echo Performing a clean install...
 call :stopServices
 
@@ -103,25 +111,26 @@ call :pullImages
 goto startServices
 
 :updateImages
+call :setTag
 echo Updating all images...
 call :stopServices
 call :pullImages
 goto startServices
 
 :pullImages
-docker pull exalens/community_broker:latest
-docker pull exalens/community_cache_db:latest
-docker pull exalens/community_threat_intel_db:latest
-docker pull exalens/community_keycloak_db:latest
-docker pull exalens/community_keycloak:latest
-docker pull exalens/community_restapi:latest
-docker pull exalens/community_webserver:latest
-docker pull exalens/community_cortex:latest
-docker pull exalens/community_cache_mongo_db:latest
-docker pull exalens/community_threat_intel_mongo_db:latest
-docker pull exalens/community_cortex_ctrl:latest
-docker pull exalens/community_probe:latest
-docker pull exalens/community_zeek:latest
+docker pull exalens/community_broker:%TAG%
+docker pull exalens/community_cache_db:%TAG%
+docker pull exalens/community_threat_intel_db:%TAG%
+docker pull exalens/community_keycloak_db:%TAG%
+docker pull exalens/community_keycloak:%TAG%
+docker pull exalens/community_restapi:%TAG%
+docker pull exalens/community_webserver:%TAG%
+docker pull exalens/community_cortex:%TAG%
+docker pull exalens/community_cache_mongo_db:%TAG%
+docker pull exalens/community_threat_intel_mongo_db:%TAG%
+docker pull exalens/community_cortex_ctrl:%TAG%
+docker pull exalens/community_probe:%TAG%
+docker pull exalens/community_zeek:%TAG%
 goto :EOF
 
 :pullIfNotExists
@@ -134,8 +143,13 @@ if errorlevel 1 (
 )
 goto :EOF
 
+
+:updateProbeHostname
+docker exec probe_ctrl python3.10 updateHostname.py %~1
+goto eof
+
 :usage
-echo Usage: retina-cortex.bat --start ^| --stop ^| --clean-install ^| --update
+echo Usage: retina-cortex.bat --start ^| --stop ^| --clean-install ^| --update ^| --update-hostname
 
 :end
 endlocal
