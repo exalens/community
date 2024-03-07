@@ -31,13 +31,10 @@ pull_images() {
     docker pull exalens/community_threat_intel_db:$TAG
     docker pull exalens/community_keycloak_db:$TAG
     docker pull exalens/community_keycloak:$TAG
-    docker pull exalens/community_restapi:$TAG
     docker pull exalens/community_webserver:$TAG
     docker pull exalens/community_cortex:$TAG
     docker pull exalens/community_cache_mongo_db:$TAG
     docker pull exalens/community_threat_intel_mongo_db:$TAG
-    docker pull exalens/community_cortex_ctrl:$TAG
-    docker pull exalens/community_probe:$TAG
     docker pull exalens/community_zeek:$TAG
 }
 
@@ -82,17 +79,14 @@ start_services() {
     pull_if_not_exists exalens/community_threat_intel_db:$TAG
     pull_if_not_exists exalens/community_keycloak_db:$TAG
     pull_if_not_exists exalens/community_keycloak:$TAG
-    pull_if_not_exists exalens/community_restapi:$TAG
     pull_if_not_exists exalens/community_webserver:$TAG
     pull_if_not_exists exalens/community_cortex:$TAG
     pull_if_not_exists exalens/community_cache_mongo_db:$TAG
     pull_if_not_exists exalens/community_threat_intel_mongo_db:$TAG
-    pull_if_not_exists exalens/community_cortex_ctrl:$TAG
-    pull_if_not_exists exalens/community_probe:$TAG
     pull_if_not_exists exalens/community_zeek:$TAG
 
     # Start the containers
-    docker run -d --name cortexCtrl --network exalens --restart always -v ~/.exalens:/opt -v /var/run/docker.sock:/var/run/docker.sock exalens/community_cortex_ctrl:$TAG > /dev/null
+    docker run -d --name cortexCtrl --network exalens --restart always -v ~/.exalens:/opt -v /var/run/docker.sock:/var/run/docker.sock exalens/community_cortex:$TAG > /dev/null
 
 
     progress
